@@ -34,6 +34,15 @@ The server will start on `http://localhost:4000`.
 
 After starting the app on port 4000 (the default port), the OpenAPI documentation will be available at http://localhost:4000/doc/
 
+# Endpoints
+
+| Resource   | Base Route  |
+|------------|-------------|
+| Users      | `/user`      |
+| Articles   | `/article`   |
+| Categories | `/category`  |
+| Comments   | `/comment`   |
+
 ## Testing
 
 After application running open new terminal and enter:
