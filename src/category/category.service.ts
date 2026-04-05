@@ -1,4 +1,9 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Category } from '../common/types';
 import { CreateCategoryRequest } from './dto/createCategoryRequest.dto';
 import { randomUUID } from 'node:crypto';
@@ -6,50 +11,54 @@ import { ArticleService } from '../article/article.service';
 
 @Injectable()
 export class CategoryService {
-    private categories: Category[] = []
-    
-    constructor(
-        @Inject(forwardRef(() => ArticleService))
-        private readonly articleService: ArticleService,
-    ) {}
+  private categories: Category[] = [];
 
-    getCategories() {
-        return this.categories
-    }
-    
-    getCategory(id: string) {
-        const category = this.categories.find(category => category.id === id)
+  constructor(
+    @Inject(forwardRef(() => ArticleService))
+    private readonly articleService: ArticleService,
+  ) {}
 
-        if (!category) throw new NotFoundException(`Category with id: ${id} was not found`)
-        
-        return category
-    }
+  getCategories() {
+    return this.categories;
+  }
 
-    createCategory(dto: CreateCategoryRequest) {
-        const newCategory = {
-            id: randomUUID(),
-            name: dto.name.trim(),
-            description: dto.description.trim()
-        }
-        this.categories.push(newCategory)
+  getCategory(id: string) {
+    const category = this.categories.find((category) => category.id === id);
 
-        return newCategory
-    }
+    if (!category)
+      throw new NotFoundException(`Category with id: ${id} was not found`);
 
-    updateCategory(id: string, dto: CreateCategoryRequest) {
-        const category = this.getCategory(id)
+    return category;
+  }
 
-        Object.assign(category, dto)
+  createCategory(dto: CreateCategoryRequest) {
+    const newCategory = {
+      id: randomUUID(),
+      name: dto.name.trim(),
+      description: dto.description.trim(),
+    };
+    this.categories.push(newCategory);
 
-        return category
-    }
+    return newCategory;
+  }
 
-    deleteCategory(id: string) {
-        const categoryIndex = this.categories.findIndex(category => category.id === id)
+  updateCategory(id: string, dto: CreateCategoryRequest) {
+    const category = this.getCategory(id);
 
-        if (categoryIndex === -1) throw new NotFoundException(`Category with id: ${id} was not found`)
+    Object.assign(category, dto);
 
-        this.categories.splice(categoryIndex, 1)
-        this.articleService.setPropertyIdToNull(id, 'categoryId')
-    }
+    return category;
+  }
+
+  deleteCategory(id: string) {
+    const categoryIndex = this.categories.findIndex(
+      (category) => category.id === id,
+    );
+
+    if (categoryIndex === -1)
+      throw new NotFoundException(`Category with id: ${id} was not found`);
+
+    this.categories.splice(categoryIndex, 1);
+    this.articleService.setPropertyIdToNull(id, 'categoryId');
+  }
 }

@@ -1,18 +1,24 @@
-import { ArticleStatus } from "../../common/enums";
-import { IsEnum, IsOptional, IsString, IsUUID, ValidateIf } from "class-validator";
+import { ArticleStatus } from '../../common/enums';
+import {
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUUID,
+  ValidateIf,
+} from 'class-validator';
 
 export class GetQueryParams {
-    @IsOptional()
-    @IsEnum(ArticleStatus)
-    status?: ArticleStatus;
-    
-    @IsOptional()
-    @ValidateIf((_, categoryId) => categoryId !== null)
-    @IsString()
-    @IsUUID()
-    categoryId?: string | null;
+  @IsOptional()
+  @IsEnum(ArticleStatus)
+  status?: ArticleStatus;
 
-    @IsOptional()
-    @IsString()
-    tag?: string;
+  @IsOptional()
+  @ValidateIf((_, categoryId) => categoryId !== null)
+  @IsString()
+  @IsUUID()
+  categoryId?: string | null;
+
+  @IsOptional()
+  @IsString()
+  tag?: string;
 }

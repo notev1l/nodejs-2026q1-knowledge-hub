@@ -1,4 +1,9 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Article } from '../common/types';
 import { CreateArticleRequest } from './dto/createArticleRequest.dto';
 import { randomUUID } from 'node:crypto';
@@ -9,77 +14,84 @@ import { CommentService } from '../comment/comment.service';
 
 @Injectable()
 export class ArticleService {
-    private articles: Article[] = []
+  private articles: Article[] = [];
 
-    constructor(
-        @Inject(forwardRef(() => CommentService))
-        private readonly commentService: CommentService
-    ) {}
+  constructor(
+    @Inject(forwardRef(() => CommentService))
+    private readonly commentService: CommentService,
+  ) {}
 
-    getArticles(query: GetQueryParams) {
-        if (Object.keys(query).length > 0) {
-            return this.articles.filter(article => {
-                if (query.status && article.status !== query.status) return false
-                if (query.categoryId && article.categoryId !== query.categoryId) return false
-                if (query.tag && !article.tags.includes(query.tag)) return false
-                return true
-            })
-        }
-
-        return this.articles        
+  getArticles(query: GetQueryParams) {
+    if (Object.keys(query).length > 0) {
+      return this.articles.filter((article) => {
+        if (query.status && article.status !== query.status) return false;
+        if (query.categoryId && article.categoryId !== query.categoryId)
+          return false;
+        if (query.tag && !article.tags.includes(query.tag)) return false;
+        return true;
+      });
     }
 
-    getArticle(id: string) {
-        const article = this.articles.find(article => article.id === id)
+    return this.articles;
+  }
 
-        if (!article) throw new NotFoundException(`Article with id: ${id} was not found`) 
+  getArticle(id: string) {
+    const article = this.articles.find((article) => article.id === id);
 
-        return article
-    }
+    if (!article)
+      throw new NotFoundException(`Article with id: ${id} was not found`);
 
-    createArticle(dto: CreateArticleRequest) {
-        const newArticle = {
-            id: randomUUID(),
-            title: dto.title.trim(),
-            content: dto.content.trim(),
-            status: dto.status ?? ArticleStatus.DRAFT,
-            authorId: dto.authorId ?? null,
-            categoryId: dto.categoryId ?? null,
-            tags: dto.tags ?? [],
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-        }
-        this.articles.push(newArticle)
+    return article;
+  }
 
-        return newArticle
-    }
+  createArticle(dto: CreateArticleRequest) {
+    const newArticle = {
+      id: randomUUID(),
+      title: dto.title.trim(),
+      content: dto.content.trim(),
+      status: dto.status ?? ArticleStatus.DRAFT,
+      authorId: dto.authorId ?? null,
+      categoryId: dto.categoryId ?? null,
+      tags: dto.tags ?? [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    this.articles.push(newArticle);
 
-    updateArticle(id: string, dto: UpdateArticleRequest) {
-        const article = this.getArticle(id)
-        article.updatedAt = Date.now()
+    return newArticle;
+  }
 
-        Object.assign(article, dto)
+  updateArticle(id: string, dto: UpdateArticleRequest) {
+    const article = this.getArticle(id);
+    article.updatedAt = Date.now();
 
-        return article
-    }
+    Object.assign(article, dto);
 
-    setPropertyIdToNull(id: string, propertyName: 'authorId' | 'categoryId') {
-        this.articles
-            .filter(article => article[propertyName] === id)
-            .forEach(article => article[propertyName] = null)
-    }
+    return article;
+  }
 
-    deleteArticle(id: string) {
-        const articleIndex = this.articles.findIndex(article => article.id === id)
+  setPropertyIdToNull(id: string, propertyName: 'authorId' | 'categoryId') {
+    this.articles
+      .filter((article) => article[propertyName] === id)
+      .forEach((article) => (article[propertyName] = null));
+  }
 
-        if (articleIndex === -1) throw new NotFoundException(`Article with id: ${id} was not found`)
+  deleteArticle(id: string) {
+    const articleIndex = this.articles.findIndex(
+      (article) => article.id === id,
+    );
 
-        this.articles.splice(articleIndex, 1)
-        this.commentService.deleteCommentsByPropertyId(id, 'articleId')
-    }
+    if (articleIndex === -1)
+      throw new NotFoundException(`Article with id: ${id} was not found`);
 
-    checkIfArticleIdExists(articleId: string) {
-        const isExists = Boolean(this.articles.find(article => article.id === articleId))
-        return isExists
-    }
+    this.articles.splice(articleIndex, 1);
+    this.commentService.deleteCommentsByPropertyId(id, 'articleId');
+  }
+
+  checkIfArticleIdExists(articleId: string) {
+    const isExists = Boolean(
+      this.articles.find((article) => article.id === articleId),
+    );
+    return isExists;
+  }
 }

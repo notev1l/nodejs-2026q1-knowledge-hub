@@ -1,7 +1,7 @@
 export enum UserRole {
   ADMIN = 'admin',
   EDITOR = 'editor',
-  VIEWER = 'viewer'
+  VIEWER = 'viewer',
 }
 
 export enum ArticleStatus {

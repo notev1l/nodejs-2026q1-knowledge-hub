@@ -1,45 +1,45 @@
-import { UserRole } from "../../common/enums";
+import { UserRole } from '../../common/enums';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class User {
-    @ApiProperty({
-        description: 'User id (uuid v4)',
-        example: '5ac7b81c-e291-403f-acbe-d0d2d2fd8583',
-        type: String,
-        format: 'uuid',
-    })
-    id: string;
+  @ApiProperty({
+    description: 'User id (uuid v4)',
+    example: '5ac7b81c-e291-403f-acbe-d0d2d2fd8583',
+    type: String,
+    format: 'uuid',
+  })
+  id: string;
 
-    @ApiProperty({
-        description: 'User login',
-        example: 'johndoe',
-        type: String,
-    })
-    login: string;
-    
-    @ApiProperty({
-        description: 'User password',
-        example: 'abc123',
-        type: String,
-    })
-    password: string;
+  @ApiProperty({
+    description: 'User login',
+    example: 'johndoe',
+    type: String,
+  })
+  login: string;
 
-    @ApiPropertyOptional({
-        description: 'User role',
-        enum: UserRole,
-        default: UserRole.VIEWER,
-    })
-    role?: UserRole;
+  @ApiProperty({
+    description: 'User password',
+    example: 'abc123',
+    type: String,
+  })
+  password: string;
 
-    @ApiPropertyOptional({
-        description: 'Timestamp when user was created',
-        example: '18753030467823',
-    })
-    createdAt: number;
+  @ApiPropertyOptional({
+    description: 'User role',
+    enum: UserRole,
+    default: UserRole.VIEWER,
+  })
+  role?: UserRole;
 
-    @ApiPropertyOptional({
-        description: 'Timestamp when user was updated',
-        example: '19793030467823',
-    })
-    updatedAt: number;
+  @ApiPropertyOptional({
+    description: 'Timestamp when user was created',
+    example: '18753030467823',
+  })
+  createdAt: number;
+
+  @ApiPropertyOptional({
+    description: 'Timestamp when user was updated',
+    example: '19793030467823',
+  })
+  updatedAt: number;
 }

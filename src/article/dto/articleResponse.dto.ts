@@ -57,16 +57,15 @@ export class ArticleResponse {
   })
   tags?: string[];
 
-
   @ApiProperty({
-      description: 'Timestamp when article was created',
-      example: '18753030467823',
+    description: 'Timestamp when article was created',
+    example: '18753030467823',
   })
   createdAt: number;
 
   @ApiProperty({
-      description: 'Timestamp when article was updated',
-      example: '19793030467823',
+    description: 'Timestamp when article was updated',
+    example: '19793030467823',
   })
   updatedAt: number;
 }
