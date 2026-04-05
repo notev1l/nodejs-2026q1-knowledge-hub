@@ -4,13 +4,23 @@ import { CreateArticleRequest } from './dto/createArticleRequest.dto';
 import { randomUUID } from 'node:crypto';
 import { ArticleStatus } from '../common/enums';
 import { UpdateArticleRequest } from './dto/updateArticleRequest.dto';
+import { GetQueryParams } from './dto/getQueryParams.dto';
 
 @Injectable()
 export class ArticleService {
     private articles: Article[] = []
 
-    getArticles() {
-        return this.articles
+    getArticles(query: GetQueryParams) {
+        if (Object.keys(query).length > 0) {
+            return this.articles.filter(article => {
+                if (query.status && article.status !== query.status) return false
+                if (query.categoryId && article.categoryId !== query.categoryId) return false
+                if (query.tag && !article.tags.includes(query.tag)) return false
+                return true
+            })
+        }
+
+        return this.articles        
     }
 
     getArticle(id: string) {

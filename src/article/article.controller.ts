@@ -1,14 +1,15 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { ArticleService } from './article.service';
-import { ApiBadRequestResponse, ApiCreatedResponse, ApiNoContentResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiCreatedResponse, ApiNoContentResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { CreateArticleRequest } from './dto/createArticleRequest.dto';
-import { articleResponse } from './dto/articleResponse.dto';
+import { ArticleResponse } from './dto/articleResponse.dto';
 import { UpdateArticleRequest } from './dto/updateArticleRequest.dto';
+import { GetQueryParams } from './dto/getQueryParams.dto';
+import { ArticleStatus } from '../common/enums';
 
 @Controller('article')
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
-
 
   // Supports optional query parameters for filtering: status, categoryId, tag (e.g. GET /article?status=published&tag=nodejs)
   @Get('/')
@@ -16,9 +17,12 @@ export class ArticleController {
     summary: 'Get all articles',
     description: 'Returns array of all articles',
   })
-  @ApiOkResponse({ description: 'Get all articles', type: [articleResponse] })
-  getArticles() {
-    return this.articleService.getArticles()
+  @ApiQuery({ name: 'status', enum: ArticleStatus, required: false })
+  @ApiQuery({ name: 'categoryId', type: String, required: false })
+  @ApiQuery({ name: 'tag', type: String, required: false })
+  @ApiOkResponse({ description: 'Get all articles', type: [ArticleResponse] })
+  getArticles(@Query() query: GetQueryParams) {
+    return this.articleService.getArticles(query)
   }
 
   @Get('/:id')
@@ -26,7 +30,7 @@ export class ArticleController {
     summary: 'Get article by Id',
     description: 'Returns specific article by Id'
   })
-  @ApiOkResponse({ description: 'Article found', type: articleResponse})
+  @ApiOkResponse({ description: 'Article found', type: ArticleResponse})
   @ApiBadRequestResponse({ description: 'Provided Id is not a valid UUID'})
   @ApiNotFoundResponse({ description: 'Article not found'})
   getArticle(@Param('id', new ParseUUIDPipe()) id: string) {
@@ -38,7 +42,7 @@ export class ArticleController {
     summary: 'Create article',
     description: 'Returns created article'
   })
-  @ApiCreatedResponse({ description: 'Article created', type: articleResponse})
+  @ApiCreatedResponse({ description: 'Article created', type: ArticleResponse})
   @ApiBadRequestResponse({ description: 'Request body does not contain required fields'})
   createArticle(@Body() dto: CreateArticleRequest) {
     return this.articleService.createArticle(dto)
@@ -49,7 +53,7 @@ export class ArticleController {
     summary: 'Update article',
     description: 'Returns updated article'
   })
-  @ApiOkResponse({ description: 'Article updated', type: articleResponse})
+  @ApiOkResponse({ description: 'Article updated', type: ArticleResponse})
   @ApiBadRequestResponse({ description: 'Provided Id is not a valid UUID'})
   @ApiNotFoundResponse({ description: 'Article not found'})
   updateArticle(@Param('id', new ParseUUIDPipe()) id: string, @Body() dto: UpdateArticleRequest) {
@@ -61,7 +65,7 @@ export class ArticleController {
   @ApiOperation({
     summary: 'Delete article',
   })
-  @ApiNoContentResponse({ description: 'Article deleted', type: articleResponse})
+  @ApiNoContentResponse({ description: 'Article deleted', type: ArticleResponse})
   @ApiBadRequestResponse({ description: 'Provided Id is not a valid UUID'})
   @ApiNotFoundResponse({ description: 'Article not found'})
   deleteArticle(@Param('id', new ParseUUIDPipe()) id: string) {

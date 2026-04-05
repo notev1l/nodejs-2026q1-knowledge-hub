@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ArticleStatus } from '../../common/enums';
 
-export class articleResponse {
+export class ArticleResponse {
   @ApiProperty({
     description: 'Article id (uuid v4)',
     example: '29d01b2a-f17b-40e0-9c8c-0c05ebbfee36',
