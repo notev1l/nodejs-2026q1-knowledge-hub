@@ -1,13 +1,20 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '../common/types';
 import { CreateUserRequest } from './dto/createUserRequest.dto';
 import { randomUUID } from 'node:crypto';
 import { UpdatePasswordDto } from './dto/UpdatePassword.dto';
 import { UserRole } from '../common/enums';
+import { CommentService } from '../comment/comment.service';
+import { ArticleService } from '../article/article.service';
 
 @Injectable()
 export class UserService {
     private users: User[] = [];
+    constructor(
+        private readonly commentService: CommentService,
+        @Inject(forwardRef(() => ArticleService))
+        private readonly articleService: ArticleService,
+    ) {}
 
     getUsers() {
         return this.users
@@ -52,5 +59,7 @@ export class UserService {
         if (userIndex === -1) throw new NotFoundException(`User with id: ${id} not found`)
 
         this.users.splice(userIndex, 1)
+        this.articleService.setPropertyIdToNull(id, 'authorId')
+        this.commentService.deleteCommentsByPropertyId(id, 'authorId')
     } 
 }

@@ -11,7 +11,6 @@ import { ArticleStatus } from '../common/enums';
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
-  // Supports optional query parameters for filtering: status, categoryId, tag (e.g. GET /article?status=published&tag=nodejs)
   @Get('/')
   @ApiOperation({
     summary: 'Get all articles',
@@ -33,7 +32,7 @@ export class ArticleController {
   @ApiOkResponse({ description: 'Article found', type: ArticleResponse})
   @ApiBadRequestResponse({ description: 'Provided Id is not a valid UUID'})
   @ApiNotFoundResponse({ description: 'Article not found'})
-  getArticle(@Param('id', new ParseUUIDPipe()) id: string) {
+  getArticleById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.articleService.getArticle(id)
   }
 

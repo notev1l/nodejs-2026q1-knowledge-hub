@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsOptional, IsString, MinLength } from "class-validator";
+import { IsOptional, IsString, IsUUID, MinLength, ValidateIf } from "class-validator";
 
 export class CreateCommentRequest {
     @IsString()
@@ -13,6 +13,7 @@ export class CreateCommentRequest {
 
     @IsString()
     @MinLength(1)
+    @IsUUID()
     @ApiProperty({
         description: 'articleId where comment was created',
         example: '29d01b2a-f17b-40e0-9c8c-0c05ebbfee36',
@@ -21,8 +22,11 @@ export class CreateCommentRequest {
     articleId: string;
 
     @IsOptional()
+    @ValidateIf((_, authorId) => authorId !== null)
     @IsString()
     @MinLength(1)
+    @IsUUID()
+    
     @ApiProperty({
         description: 'authorId that created comment',
         example: '29d01b2a-f17b-40e0-9c8c-0c05ebbfee36',

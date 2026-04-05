@@ -1,14 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Article } from '../common/types';
 import { CreateArticleRequest } from './dto/createArticleRequest.dto';
 import { randomUUID } from 'node:crypto';
 import { ArticleStatus } from '../common/enums';
 import { UpdateArticleRequest } from './dto/updateArticleRequest.dto';
 import { GetQueryParams } from './dto/getQueryParams.dto';
+import { CommentService } from '../comment/comment.service';
 
 @Injectable()
 export class ArticleService {
     private articles: Article[] = []
+
+    constructor(
+        @Inject(forwardRef(() => CommentService))
+        private readonly commentService: CommentService
+    ) {}
 
     getArticles(query: GetQueryParams) {
         if (Object.keys(query).length > 0) {
@@ -50,10 +56,17 @@ export class ArticleService {
 
     updateArticle(id: string, dto: UpdateArticleRequest) {
         const article = this.getArticle(id)
+        article.updatedAt = Date.now()
 
         Object.assign(article, dto)
 
         return article
+    }
+
+    setPropertyIdToNull(id: string, propertyName: 'authorId' | 'categoryId') {
+        this.articles
+            .filter(article => article[propertyName] === id)
+            .forEach(article => article[propertyName] = null)
     }
 
     deleteArticle(id: string) {
@@ -62,5 +75,11 @@ export class ArticleService {
         if (articleIndex === -1) throw new NotFoundException(`Article with id: ${id} was not found`)
 
         this.articles.splice(articleIndex, 1)
+        this.commentService.deleteCommentsByPropertyId(id, 'articleId')
+    }
+
+    checkIfArticleIdExists(articleId: string) {
+        const isExists = Boolean(this.articles.find(article => article.id === articleId))
+        return isExists
     }
 }
