@@ -13,7 +13,7 @@ async function bootstrap() {
     .setTitle('Knowledge Hub')
     .setDescription('Knowledge hub service for managing articles, categories, and comments')
     .setVersion('1.0.0')
-    .setContact('notev1l', 'https://github.com/notev1l', 'support@khapi.com')
+    .setContact('notev1l', 'https://github.com/notev1l', '')
     .build()
 
   const document = SwaggerModule.createDocument(app, config)
