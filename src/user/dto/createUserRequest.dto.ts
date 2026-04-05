@@ -8,7 +8,7 @@ export class CreateUserRequest {
   @ApiProperty({
     description: 'User login',
     example: 'johndoe',
-    type: 'string',
+    type: String,
   })
   login: string;
   
@@ -17,7 +17,7 @@ export class CreateUserRequest {
   @ApiProperty({
     description: 'User password',
     example: 'abc123',
-    type: 'string',
+    type: String,
   })
   password: string;
 

@@ -24,8 +24,8 @@ export class UserService {
     createUser(dto: CreateUserRequest) {
         const newUser = {
             id: randomUUID(),
-            login: dto.login,
-            password: dto.password,
+            login: dto.login.trim(),
+            password: dto.password.trim(),
             role: dto.role ?? UserRole.VIEWER,
             createdAt: Date.now(),
             updatedAt: Date.now(),

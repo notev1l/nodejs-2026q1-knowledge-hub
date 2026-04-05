@@ -5,21 +5,22 @@ export class User {
     @ApiProperty({
         description: 'User id (uuid v4)',
         example: '5ac7b81c-e291-403f-acbe-d0d2d2fd8583',
-        type: 'string',
+        type: String,
+        format: 'uuid',
     })
     id: string;
 
     @ApiProperty({
         description: 'User login',
         example: 'johndoe',
-        type: 'string',
+        type: String,
     })
     login: string;
     
     @ApiProperty({
         description: 'User password',
         example: 'abc123',
-        type: 'string',
+        type: String,
     })
     password: string;
 
