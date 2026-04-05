@@ -22,13 +22,11 @@ export class UserService {
     }
 
     createUser(dto: CreateUserRequest) {
-        const role: UserRole = (dto.role ?? 'viewer') as UserRole
-
         const newUser = {
             id: randomUUID(),
             login: dto.login,
             password: dto.password,
-            role: role,
+            role: dto.role ?? UserRole.VIEWER,
             createdAt: Date.now(),
             updatedAt: Date.now(),
         }
