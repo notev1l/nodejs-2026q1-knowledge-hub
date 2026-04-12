@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserRequest } from './dto/createUserRequest.dto';
-import { UpdatePasswordDto } from './dto/UpdatePassword.dto';
+import { UpdatePasswordDto } from './dto/updatePassword.dto';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
