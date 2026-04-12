@@ -7,7 +7,7 @@
 docker pull notev1l/nodejs-2026q1-knowledge-hub-app
 ```
 
-Image size: ~352MB
+Final application image size is: ~352MB
 
 ## Requirements
 
