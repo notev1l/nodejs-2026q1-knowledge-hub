@@ -1,33 +1,26 @@
 import {
   ForbiddenException,
-  forwardRef,
-  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { User } from '../common/types';
 import { CreateUserRequest } from './dto/createUserRequest.dto';
-import { randomUUID } from 'node:crypto';
 import { UpdatePasswordDto } from './dto/updatePassword.dto';
-import { UserRole } from '../common/enums';
-import { CommentService } from '../comment/comment.service';
-import { ArticleService } from '../article/article.service';
+import { UserRole } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class UserService {
-  private users: User[] = [];
-  constructor(
-    private readonly commentService: CommentService,
-    @Inject(forwardRef(() => ArticleService))
-    private readonly articleService: ArticleService,
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
-  getUsers() {
-    return this.users;
+  async findAll(): Promise<User[]> {
+    return await this.prismaService.user.findMany();
   }
 
-  getUserById(id: string) {
-    const user = this.users.find((user) => user.id === id);
+  async findById(id: string): Promise<User> {
+    const user = await this.prismaService.user.findUnique({
+      where: { id },
+    });
 
     if (!user)
       throw new NotFoundException(`User with id: ${id} was not found.`);
@@ -35,39 +28,49 @@ export class UserService {
     return user;
   }
 
-  createUser(dto: CreateUserRequest) {
-    const newUser = {
-      id: randomUUID(),
-      login: dto.login.trim(),
-      password: dto.password.trim(),
-      role: dto.role ?? UserRole.VIEWER,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    };
-    this.users.push(newUser);
-
-    return newUser;
+  async createUser(dto: CreateUserRequest): Promise<User> {
+    console.log('Creating user:', dto);
+    const user = await this.prismaService.user.create({
+      data: {
+        login: dto.login.trim(),
+        password: dto.password.trim(),
+        role: dto.role ?? UserRole.VIEWER,
+      },
+    });
+    console.log('Created user:', user); // and this
+    return user;
   }
 
-  updatePassword(id: string, dto: UpdatePasswordDto) {
-    const user = this.getUserById(id);
+  async updatePassword(id: string, dto: UpdatePasswordDto): Promise<boolean> {
+    const user = await this.findById(id);
 
     if (user.password !== dto.oldPassword) {
       throw new ForbiddenException('Old password is wrong');
     }
-    user.password = dto.newPassword;
-    user.updatedAt = Date.now();
-    return user;
+
+    await this.prismaService.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        password: dto.newPassword,
+      },
+    });
+
+    return true;
   }
 
-  deleteUser(id: string) {
-    const userIndex = this.users.findIndex((user) => user.id === id);
+  async deleteUser(id: string) {
+    const user = await this.findById(id);
 
-    if (userIndex === -1)
+    if (!user) {
       throw new NotFoundException(`User with id: ${id} not found`);
+    }
 
-    this.users.splice(userIndex, 1);
-    this.articleService.setPropertyIdToNull(id, 'authorId');
-    this.commentService.deleteCommentsByPropertyId(id, 'authorId');
+    await this.prismaService.user.delete({
+      where: {
+        id,
+      },
+    });
   }
 }
