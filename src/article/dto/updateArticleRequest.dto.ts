@@ -6,7 +6,7 @@ import {
   MinLength,
   ValidateIf,
 } from 'class-validator';
-import { ArticleStatus } from '../../common/enums';
+import { ArticleStatus } from '@prisma/client';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateArticleRequest {

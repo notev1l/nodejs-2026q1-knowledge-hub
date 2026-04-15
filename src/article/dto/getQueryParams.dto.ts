@@ -1,4 +1,4 @@
-import { ArticleStatus } from '../../common/enums';
+import { ArticleStatus } from '@prisma/client';
 import {
   IsEnum,
   IsOptional,
