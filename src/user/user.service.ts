@@ -60,7 +60,7 @@ export class UserService {
     return true;
   }
 
-  async deleteUser(id: string) {
+  async deleteUser(id: string): Promise<void> {
     const user = await this.findById(id);
 
     if (!user) {
