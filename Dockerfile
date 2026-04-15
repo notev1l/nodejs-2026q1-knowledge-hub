@@ -22,4 +22,3 @@ COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
 RUN  addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 EXPOSE 4000
-CMD ["node", "dist/src/main.js"]

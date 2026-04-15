@@ -14,7 +14,8 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/db"
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}"
+    command: sh -c "npx prisma migrate deploy && npx prisma db seed && node dist/src/main.js"
     restart: on-failure
     networks:
       backend:
