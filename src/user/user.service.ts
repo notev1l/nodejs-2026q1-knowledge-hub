@@ -5,21 +5,33 @@ import {
 } from '@nestjs/common';
 import { CreateUserRequest } from './dto/createUserRequest.dto';
 import { UpdatePasswordDto } from './dto/updatePassword.dto';
-import { UserRole } from '@prisma/client';
+import { User, UserRole, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { User } from '@prisma/client';
+
+type SafeUser = Omit<User, 'password'>;
+
+const safeUserSelect = Prisma.validator<Prisma.UserSelect>()({
+  id: true,
+  login: true,
+  role: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
 @Injectable()
 export class UserService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async findAll(): Promise<User[]> {
-    return await this.prismaService.user.findMany();
+  async findAll(): Promise<SafeUser[]> {
+    return await this.prismaService.user.findMany({
+      select: safeUserSelect,
+    });
   }
 
-  async findById(id: string): Promise<User> {
+  async findById(id: string): Promise<SafeUser> {
     const user = await this.prismaService.user.findUnique({
       where: { id },
+      select: safeUserSelect,
     });
 
     if (!user)
@@ -28,21 +40,22 @@ export class UserService {
     return user;
   }
 
-  async createUser(dto: CreateUserRequest): Promise<User> {
-    console.log('Creating user:', dto);
+  async createUser(dto: CreateUserRequest): Promise<SafeUser> {
     const user = await this.prismaService.user.create({
       data: {
         login: dto.login.trim(),
         password: dto.password.trim(),
         role: dto.role ?? UserRole.VIEWER,
       },
+      select: safeUserSelect,
     });
-    console.log('Created user:', user); // and this
     return user;
   }
 
   async updatePassword(id: string, dto: UpdatePasswordDto): Promise<boolean> {
-    const user = await this.findById(id);
+    const user = await this.prismaService.user.findUnique({
+      where: { id }
+    })
 
     if (user.password !== dto.oldPassword) {
       throw new ForbiddenException('Old password is wrong');
