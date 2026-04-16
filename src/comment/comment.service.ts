@@ -35,7 +35,7 @@ export class CommentService {
     const articleId = await this.prismaService.article.findUnique({
       where: { id: dto.articleId}
     })
-    if (!articleId) {
+    if (dto.articleId && !articleId) {
       throw new UnprocessableEntityException(
         `ArticleId ${dto.articleId} doesnt exists`,
       );
@@ -44,7 +44,7 @@ export class CommentService {
      const authorId = await this.prismaService.user.findUnique({
       where: { id: dto.authorId}
     })
-    if (!authorId) {
+    if (dto.authorId && !authorId) {
       throw new UnprocessableEntityException(
         `AuthorId ${dto.authorId} doesnt exists`,
       );

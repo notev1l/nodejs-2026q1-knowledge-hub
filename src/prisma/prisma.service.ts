@@ -10,7 +10,11 @@ export class PrismaService
 
     public constructor() {
       const adapter = new PrismaPg({
-        connectionString: process.env.DATABASE_URL
+        connectionString: process.env.DATABASE_URL,
+        max: 10,
+        idleTimeoutMillis: 300000,
+        connectionTimeoutMillis: 5000,
+        
       })
 
       super({ adapter })

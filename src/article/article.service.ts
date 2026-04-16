@@ -49,6 +49,23 @@ export class ArticleService {
   }
 
   async createArticle(dto: CreateArticleRequest): Promise<Article> {
+
+    const authorId = await this.prismaService.user.findUnique({
+      where: { id: dto.authorId }
+    })
+
+    if (dto.authorId && !authorId) {
+      throw new NotFoundException(`AuthorId with id: ${dto.authorId} was not found`)
+    }
+    
+    const categoryId = await this.prismaService.category.findUnique({
+      where: { id: dto.categoryId }
+    })
+
+    if (dto.categoryId && !categoryId) {
+      throw new NotFoundException(`CategoryId with id: ${dto.categoryId} was not found`)
+    }
+
     const article = await this.prismaService.article.create({
       data: {
         title: dto.title.trim(),
@@ -56,7 +73,7 @@ export class ArticleService {
         status: dto.status ?? ArticleStatus.DRAFT,
         authorId: dto.authorId ?? null,
         categoryId: dto.categoryId ?? null,
-        ...(dto.tags ?? {
+        ...(dto.tags && {
           tags: {
             connectOrCreate: dto.tags.map(tag => ({
               where: { name: tag},
