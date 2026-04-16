@@ -56,12 +56,14 @@ export class ArticleService {
         status: dto.status ?? ArticleStatus.DRAFT,
         authorId: dto.authorId ?? null,
         categoryId: dto.categoryId ?? null,
-        tags: dto.tags ? {
-          connectOrCreate: dto.tags.map(tag => ({
-            where: { name: tag},
-            create: { name: tag},
-          })),
-        } : null,
+        ...(dto.tags ?? {
+          tags: {
+            connectOrCreate: dto.tags.map(tag => ({
+              where: { name: tag},
+              create: { name: tag},
+            })),
+          }
+        }),
       },
       include: {
         tags: {
@@ -87,6 +89,7 @@ export class ArticleService {
         ...(dto.authorId !== undefined && { authorId: dto.authorId}),
         ...(dto.categoryId !== undefined && { categoryId: dto.categoryId}),
         ...(dto.tags !== undefined && { tags: {
+          set: [],
           connectOrCreate: dto.tags.map(tag => ({
             where: { name: tag },
             create: { name: tag },

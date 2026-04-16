@@ -57,6 +57,10 @@ export class UserService {
       where: { id }
     })
 
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
     if (user.password !== dto.oldPassword) {
       throw new ForbiddenException('Old password is wrong');
     }
@@ -74,11 +78,7 @@ export class UserService {
   }
 
   async deleteUser(id: string): Promise<void> {
-    const user = await this.findById(id);
-    
-    if (!user) {
-      throw new NotFoundException(`User with id: ${id} not found`);
-    }
+    await this.findById(id);
 
     await this.prismaService.user.delete({
       where: {

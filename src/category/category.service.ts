@@ -17,7 +17,7 @@ export class CategoryService {
   }
 
   async getCategory(id: string): Promise<Category> {
-    const category =  this.prismaService.category.findUnique({
+    const category =  await this.prismaService.category.findUnique({
       where: { id }
     })
 
@@ -37,7 +37,8 @@ export class CategoryService {
   }
 
   async updateCategory(id: string, dto: CreateCategoryRequest): Promise<Category> {
-
+    await this.getCategory(id)
+    
     return await this.prismaService.category.update({
       where: { id },
       data: {
@@ -48,10 +49,7 @@ export class CategoryService {
   }
 
   async deleteCategory(id: string): Promise<void> {
-    const category = await this.getCategory(id)
-
-    if (!category)
-      throw new NotFoundException(`Category with id: ${id} was not found`);
+    await this.getCategory(id)
 
     await this.prismaService.category.delete({
       where: { id }
