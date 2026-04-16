@@ -49,6 +49,7 @@ model Article {
   comments Comment[]
   tags     Tag[]
 
+  @@index([status, categoryId])
   @@map("article")
 }
 
