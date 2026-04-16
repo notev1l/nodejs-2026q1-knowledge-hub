@@ -10,7 +10,7 @@ import { GetQueryParams } from './dto/getQueryParams.dto';
 export class ArticleService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getArticles(query: GetQueryParams) {
+  async getArticles(query: GetQueryParams): Promise<Article[]> {
     return await this.prismaService.article.findMany({
       where: {
         ...(query.status !== undefined && { status: query.status }),
@@ -48,7 +48,7 @@ export class ArticleService {
     return article;
   }
 
-  async createArticle(dto: CreateArticleRequest) {
+  async createArticle(dto: CreateArticleRequest): Promise<Article> {
     const article = await this.prismaService.article.create({
       data: {
         title: dto.title.trim(),
@@ -75,7 +75,7 @@ export class ArticleService {
     return article;
   }
 
-  async updateArticle(id: string, dto: UpdateArticleRequest) {
+  async updateArticle(id: string, dto: UpdateArticleRequest): Promise<Article> {
     return await this.prismaService.article.update({
       where: {
         id,
@@ -103,7 +103,7 @@ export class ArticleService {
     });
   }
 
-  async deleteArticle(id: string) {
+  async deleteArticle(id: string): Promise<void> {
     await this.getArticle(id)
     await this.prismaService.article.delete({ where: { id } })
   }
