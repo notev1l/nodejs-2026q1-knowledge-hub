@@ -1,29 +1,25 @@
 import {
-  forwardRef,
-  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Category } from '../common/types';
 import { CreateCategoryRequest } from './dto/createCategoryRequest.dto';
-import { randomUUID } from 'node:crypto';
-import { ArticleService } from '../article/article.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { Category } from '@prisma/client';
 
 @Injectable()
 export class CategoryService {
-  private categories: Category[] = [];
-
   constructor(
-    @Inject(forwardRef(() => ArticleService))
-    private readonly articleService: ArticleService,
+    private readonly prismaService: PrismaService
   ) {}
 
-  getCategories() {
-    return this.categories;
+  async getCategories(): Promise<Category[]> {
+    return await this.prismaService.category.findMany()
   }
 
-  getCategory(id: string) {
-    const category = this.categories.find((category) => category.id === id);
+  async getCategory(id: string): Promise<Category> {
+    const category =  this.prismaService.category.findUnique({
+      where: { id }
+    })
 
     if (!category)
       throw new NotFoundException(`Category with id: ${id} was not found`);
@@ -31,34 +27,34 @@ export class CategoryService {
     return category;
   }
 
-  createCategory(dto: CreateCategoryRequest) {
-    const newCategory = {
-      id: randomUUID(),
-      name: dto.name.trim(),
-      description: dto.description.trim(),
-    };
-    this.categories.push(newCategory);
-
-    return newCategory;
+  async createCategory(dto: CreateCategoryRequest): Promise<Category> {
+    return await this.prismaService.category.create({
+      data: {
+        name: dto.name.trim(),
+        description: dto.description.trim(),
+      }
+    })
   }
 
-  updateCategory(id: string, dto: CreateCategoryRequest) {
-    const category = this.getCategory(id);
+  async updateCategory(id: string, dto: CreateCategoryRequest): Promise<Category> {
 
-    Object.assign(category, dto);
-
-    return category;
+    return await this.prismaService.category.update({
+      where: { id },
+      data: {
+        name: dto.name.trim(),
+        description: dto.description.trim(),
+      }
+    })
   }
 
-  deleteCategory(id: string) {
-    const categoryIndex = this.categories.findIndex(
-      (category) => category.id === id,
-    );
+  async deleteCategory(id: string): Promise<void> {
+    const category = await this.getCategory(id)
 
-    if (categoryIndex === -1)
+    if (!category)
       throw new NotFoundException(`Category with id: ${id} was not found`);
 
-    this.categories.splice(categoryIndex, 1);
-    this.articleService.setPropertyIdToNull(id, 'categoryId');
+    await this.prismaService.category.delete({
+      where: { id }
+    })
   }
 }
