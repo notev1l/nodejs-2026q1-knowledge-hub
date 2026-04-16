@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserRequest } from './dto/createUserRequest.dto';
-import { UpdatePasswordDto } from './dto/UpdatePassword.dto';
+import { UpdatePasswordDto } from './dto/updatePassword.dto';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
@@ -38,7 +38,7 @@ export class UserController {
   })
   @ApiOkResponse({ description: 'Array of user records', type: [UserResponse] })
   getUsers() {
-    return this.userService.getUsers().map((user) => new UserResponse(user));
+    return this.userService.findAll();
   }
 
   @Get('/:id')
@@ -51,7 +51,7 @@ export class UserController {
   @ApiBadRequestResponse({ description: 'Provided ID is not a valid UUID' })
   @ApiNotFoundResponse({ description: 'User not found' })
   getUserById(@Param('id', new ParseUUIDPipe()) id: string) {
-    return new UserResponse(this.userService.getUserById(id));
+    return this.userService.findById(id);
   }
 
   @Post('/')
@@ -64,7 +64,7 @@ export class UserController {
     description: 'Request body does not contain required fields',
   })
   createUser(@Body() dto: CreateUserRequest) {
-    return new UserResponse(this.userService.createUser(dto));
+    return this.userService.createUser(dto);
   }
 
   @Put('/:id')
@@ -81,7 +81,7 @@ export class UserController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdatePasswordDto,
   ) {
-    return new UserResponse(this.userService.updatePassword(id, dto));
+    return this.userService.updatePassword(id, dto);
   }
 
   @Delete('/:id')

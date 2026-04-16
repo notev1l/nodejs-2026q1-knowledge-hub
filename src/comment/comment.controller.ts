@@ -48,7 +48,7 @@ export class CommentController {
   })
   @ApiOkResponse({ description: 'Get comment by Id', type: CommentResponse })
   getCommentsById(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.commentService.getCommentsById(id);
+    return this.commentService.getCommentById(id);
   }
 
   @Post('/')

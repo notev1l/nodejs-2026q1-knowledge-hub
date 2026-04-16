@@ -21,10 +21,10 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { CreateArticleRequest } from './dto/createArticleRequest.dto';
-import { ArticleResponse } from './dto/articleResponse.dto';
 import { UpdateArticleRequest } from './dto/updateArticleRequest.dto';
+import { ArticleResponse } from './dto/articleResponse.dto';
 import { GetQueryParams } from './dto/getQueryParams.dto';
-import { ArticleStatus } from '../common/enums';
+import { ArticleStatus } from '@prisma/client';
 
 @Controller('article')
 export class ArticleController {
