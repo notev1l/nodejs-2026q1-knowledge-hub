@@ -75,7 +75,7 @@ export class UserService {
 
   async deleteUser(id: string): Promise<void> {
     const user = await this.findById(id);
-
+    
     if (!user) {
       throw new NotFoundException(`User with id: ${id} not found`);
     }

@@ -5,15 +5,13 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateArticleRequest } from './dto/createArticleRequest.dto';
 import { UpdateArticleRequest } from './dto/updateArticleRequest.dto';
 import { GetQueryParams } from './dto/getQueryParams.dto';
-import { randomUUID } from 'node:crypto';
-import { title } from 'node:process';
 
 @Injectable()
 export class ArticleService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async getArticles(query: GetQueryParams) {
-    return this.prismaService.article.findMany({
+    return await this.prismaService.article.findMany({
       where: {
         ...(query.status !== undefined && { status: query.status }),
         ...(query.categoryId !== undefined && { categoryId: query.categoryId }),
@@ -23,12 +21,24 @@ export class ArticleService {
           }
         }})
       },
+      include: {
+        tags: {
+          select: { name: true }
+        }
+      }
     });
   }
 
   async getArticle(id: string): Promise<Article> {
-    const article = this.prismaService.article.findUnique({
+    const article = await this.prismaService.article.findUnique({
       where: { id },
+      include: {
+        tags: {
+          select: {
+            name: true,
+          }
+        }
+      }
     });
 
     if (!article) {
@@ -39,7 +49,7 @@ export class ArticleService {
   }
 
   async createArticle(dto: CreateArticleRequest) {
-    const article = this.prismaService.article.create({
+    const article = await this.prismaService.article.create({
       data: {
         title: dto.title.trim(),
         content: dto.content.trim(),
@@ -53,8 +63,15 @@ export class ArticleService {
           })),
         } : null,
       },
+      include: {
+        tags: {
+          select: {
+            name: true,
+          }
+        }
+      }
     });
-
+    
     return article;
   }
 
@@ -67,8 +84,8 @@ export class ArticleService {
         ...(dto.title !== undefined && { title: dto.title.trim() }),
         ...(dto.content !== undefined && { content: dto.content.trim() }),
         ...(dto.status !== undefined && { status: dto.status }),
-        ...(dto.authorId !== undefined && { authorId: dto.authorId ?? null }),
-        ...(dto.categoryId !== undefined && { categoryId: dto.categoryId ?? null }),
+        ...(dto.authorId !== undefined && { authorId: dto.authorId}),
+        ...(dto.categoryId !== undefined && { categoryId: dto.categoryId}),
         ...(dto.tags !== undefined && { tags: {
           connectOrCreate: dto.tags.map(tag => ({
             where: { name: tag },
@@ -76,28 +93,18 @@ export class ArticleService {
           }))
         }}),
       },
+      include: {
+        tags: {
+          select: {
+            name: true,
+          }
+        }
+      }
     });
   }
 
-/*   setPropertyIdToNull(id: string, propertyName: 'authorId' | 'categoryId') {
-    this.articles
-      .filter((article) => article[propertyName] === id)
-      .forEach((article) => (article[propertyName] = null));
-  } */
-
   async deleteArticle(id: string) {
-    await this.prismaService.article.delete({
-      where: { id }
-    })
-
-/*     if (articleIndex === -1)
-      throw new NotFoundException(`Article with id: ${id} was not found`); */
+    await this.getArticle(id)
+    await this.prismaService.article.delete({ where: { id } })
   }
-
-/*   async checkIfArticleIdExists(articleId: string) {
-    const isExists = Boolean(
-      this.articles.find((article) => article.id === articleId),
-    );
-    return isExists;
-  } */
 }
