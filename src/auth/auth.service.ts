@@ -107,5 +107,7 @@ export class AuthService {
       where: { id },
       data: { refreshToken: null }
     })
+
+    return { message: 'Logout successful' }
   }
 }

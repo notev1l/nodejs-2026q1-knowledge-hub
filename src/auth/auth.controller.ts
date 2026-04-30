@@ -1,16 +1,18 @@
 import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiForbiddenResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiConflictResponse, ApiCreatedResponse, ApiForbiddenResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { UserResponse } from '../user/dto/userResponse.dto';
 import { AuthDTO } from './dto/auth.dto';
 import { Public } from '../decorators/public.decorator';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { User } from '@prisma/client';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
   @Public()
   @Post('/signup')
   @ApiOperation({
@@ -25,6 +27,7 @@ export class AuthController {
     return this.authService.signUp(dto.login, dto.password);
   }
 
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
   @Public()
   @Post('/login')
   @ApiOperation({
@@ -47,6 +50,7 @@ export class AuthController {
     summary: 'Refresh',
     description: 'Returns access and refresh tokens',
   })
+  @ApiBody({ schema: { properties: { refreshToken: { type: 'string' } } } })
   @HttpCode(200)  
   @ApiOkResponse({ description: 'Access and refresh tokens' })
   @ApiUnauthorizedResponse({
@@ -57,6 +61,7 @@ export class AuthController {
     return this.authService.refresh(refreshToken);
   }
 
+  @ApiBearerAuth()
   @Post('/logout')
   @ApiOperation({
     summary: 'Logout',
