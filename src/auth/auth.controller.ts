@@ -56,4 +56,18 @@ export class AuthController {
   refresh(@Body('refreshToken') refreshToken: string) {
     return this.authService.refresh(refreshToken);
   }
+
+  @Post('/logout')
+  @ApiOperation({
+    summary: 'Logout',
+    description: 'Logout and invalidate refresh token from DB',
+  })
+  @HttpCode(200)  
+  @ApiOkResponse({ description: 'Logout successful' })
+  @ApiUnauthorizedResponse({
+    description: 'You are not logged in',
+  })
+  logout(@CurrentUser() user: User) {
+    return this.authService.logout(user.id);
+  }
 }

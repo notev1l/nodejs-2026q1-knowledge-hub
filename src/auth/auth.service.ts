@@ -93,4 +93,19 @@ export class AuthService {
       throw new ForbiddenException('Refresh token is invalid or expired');
     }
   }
+
+  async logout(id: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id },
+    })
+
+    if (!user.refreshToken) {
+      throw new UnauthorizedException(`You are not logged in`) 
+    }
+
+    await this.prismaService.user.update({
+      where: { id },
+      data: { refreshToken: null }
+    })
+  }
 }
