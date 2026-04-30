@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Article } from '@prisma/client';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Article, Category, User } from '@prisma/client';
 import { ArticleStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateArticleRequest } from './dto/createArticleRequest.dto';
@@ -50,19 +50,26 @@ export class ArticleService {
 
   async createArticle(dto: CreateArticleRequest): Promise<Article> {
 
-    const authorId = await this.prismaService.user.findUnique({
-      where: { id: dto.authorId }
-    })
+    let author: User
+    let category: Category
 
-    if (dto.authorId && !authorId) {
+    if (dto.authorId) {
+      author = await this.prismaService.user.findUnique({
+        where: { id: dto.authorId },
+      })
+    }
+
+    if (dto.authorId && !author) {
       throw new NotFoundException(`AuthorId with id: ${dto.authorId} was not found`)
     }
     
-    const categoryId = await this.prismaService.category.findUnique({
-      where: { id: dto.categoryId }
-    })
+    if (dto.categoryId) {
+      category = await this.prismaService.category.findUnique({
+        where: { id: dto.categoryId }
+      })
+    }
 
-    if (dto.categoryId && !categoryId) {
+    if (dto.categoryId && !category) {
       throw new NotFoundException(`CategoryId with id: ${dto.categoryId} was not found`)
     }
 
@@ -94,7 +101,14 @@ export class ArticleService {
     return article;
   }
 
-  async updateArticle(id: string, dto: UpdateArticleRequest): Promise<Article> {
+  async updateArticle(user: User, id: string, dto: UpdateArticleRequest): Promise<Article> {
+    
+    const article = await this.getArticle(id)
+
+    if (user.role !== 'ADMIN' && article.authorId !== user.id) {
+      throw new ForbiddenException(`You are not allowed to perform this action`)
+    }
+
     return await this.prismaService.article.update({
       where: {
         id,
@@ -123,8 +137,13 @@ export class ArticleService {
     });
   }
 
-  async deleteArticle(id: string): Promise<void> {
-    await this.getArticle(id)
+  async deleteArticle(user: User, id: string): Promise<void> {
+    const article = await this.getArticle(id)
+
+    if (user.role !== 'ADMIN' && article.authorId !== user.id) {
+      throw new ForbiddenException(`You are not allowed to perform this action`)
+    }
+
     await this.prismaService.article.delete({ where: { id } })
   }
 }

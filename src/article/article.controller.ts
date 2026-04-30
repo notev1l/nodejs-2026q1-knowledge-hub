@@ -15,6 +15,7 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -25,7 +26,9 @@ import { CreateArticleRequest } from './dto/createArticleRequest.dto';
 import { UpdateArticleRequest } from './dto/updateArticleRequest.dto';
 import { ArticleResponse } from './dto/articleResponse.dto';
 import { GetQueryParams } from './dto/getQueryParams.dto';
-import { ArticleStatus } from '@prisma/client';
+import { ArticleStatus, User, UserRole } from '@prisma/client';
+import { Roles } from '../decorators/roles.decorator';
+import { CurrentUser } from '../decorators/current-user.decorator';
 
 @ApiBearerAuth()
 @Controller('article')
@@ -57,6 +60,7 @@ export class ArticleController {
     return this.articleService.getArticle(id);
   }
 
+  @Roles(UserRole.EDITOR)
   @Post('/')
   @ApiOperation({
     summary: 'Create article',
@@ -70,6 +74,7 @@ export class ArticleController {
     return this.articleService.createArticle(dto);
   }
 
+  @Roles(UserRole.EDITOR)
   @Put('/:id')
   @ApiOperation({
     summary: 'Update article',
@@ -78,13 +83,16 @@ export class ArticleController {
   @ApiOkResponse({ description: 'Article updated', type: ArticleResponse })
   @ApiBadRequestResponse({ description: 'Provided Id is not a valid UUID' })
   @ApiNotFoundResponse({ description: 'Article not found' })
+  @ApiForbiddenResponse({ description: '123' })
   updateArticle(
+    @CurrentUser() user: User,
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateArticleRequest,
   ) {
-    return this.articleService.updateArticle(id, dto);
+    return this.articleService.updateArticle(user, id, dto);
   }
 
+  @Roles(UserRole.EDITOR)
   @Delete('/:id')
   @HttpCode(204)
   @ApiOperation({
@@ -96,7 +104,7 @@ export class ArticleController {
   })
   @ApiBadRequestResponse({ description: 'Provided Id is not a valid UUID' })
   @ApiNotFoundResponse({ description: 'Article not found' })
-  deleteArticle(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.articleService.deleteArticle(id);
+  deleteArticle(@CurrentUser() user: User, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.articleService.deleteArticle(user, id);
   }
 }

@@ -1,11 +1,12 @@
 import {
+  ForbiddenException,
   forwardRef,
   Inject,
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { Comment } from '@prisma/client';
+import { Comment, User } from '@prisma/client';
 import { CreateCommentRequest } from './dto/createCommentRequest.dto';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -61,11 +62,12 @@ export class CommentService {
     return newComment
   }
 
-  async deleteCommentById(id: string): Promise<void> {
+  async deleteCommentById(user: User, id: string): Promise<void> {
     const comment = await this.getCommentById(id)
 
-    if (!comment)
-      throw new NotFoundException(`Comment with id: ${id} was not found`);
+    if (user.role !== 'ADMIN' && comment.authorId !== user.id) {
+      throw new ForbiddenException(`You are not allowed to perform this action`)
+    }
 
     await this.prismaService.comment.delete({
       where: { id }

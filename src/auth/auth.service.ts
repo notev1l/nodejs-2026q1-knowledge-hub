@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, ForbiddenException, Injectable,
 import { PrismaService } from '../prisma/prisma.service';
 import { SafeUser, safeUserSelect } from '../shared/types/safeUser.type';
 import { JwtService } from '@nestjs/jwt';
-import { UserRole } from '@prisma/client';
+import { User, UserRole } from '@prisma/client';
 import { hash, compare } from 'bcrypt';
  
 @Injectable()
@@ -90,7 +90,7 @@ export class AuthService {
 
       return this.authenticate(user.id, user.login, user.role)
     } catch (error) {
-      throw new ForbiddenException('Invalid refresh token');
+      throw new ForbiddenException('Refresh token is invalid or expired');
     }
   }
 }

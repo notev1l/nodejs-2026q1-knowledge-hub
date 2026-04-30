@@ -40,11 +40,11 @@ export class AuthGuard implements CanActivate {
         where: { id: payload.sub }
       })
 
-      request.user = payload
+      request.user = user
 
       return true
     } catch (error) {
-      throw new ForbiddenException('Invalid refresh token');
+      throw new UnauthorizedException('Something went wrong...');
     }
   }
 }

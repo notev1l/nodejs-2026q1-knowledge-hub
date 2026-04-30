@@ -26,6 +26,8 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { UserResponse } from './dto/userResponse.dto';
+import { Roles } from '../decorators/roles.decorator';
+import { UserRole } from '@prisma/client';
 
 @ApiBearerAuth()
 @Controller('user')
@@ -56,6 +58,7 @@ export class UserController {
     return this.userService.findById(id);
   }
 
+  @Roles(UserRole.ADMIN)
   @Post('/')
   @ApiOperation({
     summary: 'Create user',
@@ -68,7 +71,7 @@ export class UserController {
   createUser(@Body() dto: CreateUserRequest) {
     return this.userService.createUser(dto);
   }
-
+  @Roles(UserRole.ADMIN)
   @Put('/:id')
   @ApiOperation({
     summary: 'Update user password',
@@ -85,7 +88,7 @@ export class UserController {
   ) {
     return this.userService.updatePassword(id, dto);
   }
-
+  @Roles(UserRole.ADMIN)
   @Delete('/:id')
   @ApiOperation({
     summary: 'Delete user',

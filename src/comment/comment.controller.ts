@@ -23,6 +23,9 @@ import {
 } from '@nestjs/swagger';
 import { CommentResponse } from './dto/commentResponse.dto';
 import { CreateCommentRequest } from './dto/createCommentRequest.dto';
+import { Roles } from '../decorators/roles.decorator';
+import { User, UserRole } from '@prisma/client';
+import { CurrentUser } from '../decorators/current-user.decorator';
 
 @ApiBearerAuth()
 @Controller('comment')
@@ -53,6 +56,7 @@ export class CommentController {
     return this.commentService.getCommentById(id);
   }
 
+  @Roles(UserRole.EDITOR)
   @Post('/')
   @ApiOperation({
     summary: 'Create comment for specific article',
@@ -67,6 +71,7 @@ export class CommentController {
     return this.commentService.createComment(dto);
   }
 
+  @Roles(UserRole.EDITOR)
   @Delete('/:id')
   @HttpCode(204)
   @ApiOperation({
@@ -78,7 +83,7 @@ export class CommentController {
   })
   @ApiBadRequestResponse({ description: 'Provided Id is not a valid UUID' })
   @ApiNotFoundResponse({ description: 'Comment not found' })
-  deleteCommentById(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.commentService.deleteCommentById(id);
+  deleteCommentById(@CurrentUser() user: User, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.commentService.deleteCommentById(user, id);
   }
 }

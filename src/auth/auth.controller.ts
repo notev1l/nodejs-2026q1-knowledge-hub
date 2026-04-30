@@ -4,6 +4,8 @@ import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiForb
 import { UserResponse } from '../user/dto/userResponse.dto';
 import { AuthDTO } from './dto/auth.dto';
 import { Public } from '../decorators/public.decorator';
+import { CurrentUser } from '../decorators/current-user.decorator';
+import { User } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
