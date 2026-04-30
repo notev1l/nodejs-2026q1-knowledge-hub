@@ -12,6 +12,7 @@ import {
 import { CommentService } from './comment.service';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
@@ -23,6 +24,7 @@ import {
 import { CommentResponse } from './dto/commentResponse.dto';
 import { CreateCommentRequest } from './dto/createCommentRequest.dto';
 
+@ApiBearerAuth()
 @Controller('comment')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}

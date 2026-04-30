@@ -20,6 +20,7 @@ async function bootstrap() {
     )
     .setVersion('1.0.0')
     .setContact('notev1l', 'https://github.com/notev1l', '')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

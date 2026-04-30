@@ -12,6 +12,7 @@ import {
 import { CategoryService } from './category.service';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
@@ -22,6 +23,7 @@ import {
 import { CategoryResponse } from './dto/categoryResponse.dto';
 import { CreateCategoryRequest } from './dto/createCategoryRequest.dto';
 
+@ApiBearerAuth()
 @Controller('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}

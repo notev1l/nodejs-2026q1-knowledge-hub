@@ -40,6 +40,9 @@ export class UserResponse {
   })
   updatedAt: Date;
 
+  @Exclude()
+  refreshToken: String | null;
+
   constructor(partialResponse: Partial<UserResponse>) {
     Object.assign(this, partialResponse);
   }

@@ -5,18 +5,9 @@ import {
 } from '@nestjs/common';
 import { CreateUserRequest } from './dto/createUserRequest.dto';
 import { UpdatePasswordDto } from './dto/updatePassword.dto';
-import { User, UserRole, Prisma } from '@prisma/client';
+import { UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-
-type SafeUser = Omit<User, 'password'>;
-
-const safeUserSelect = Prisma.validator<Prisma.UserSelect>()({
-  id: true,
-  login: true,
-  role: true,
-  createdAt: true,
-  updatedAt: true,
-});
+import { SafeUser, safeUserSelect } from '../shared/types/safeUser.type';
 
 @Injectable()
 export class UserService {
@@ -40,7 +31,7 @@ export class UserService {
     return user;
   }
 
-  async createUser(dto: CreateUserRequest): Promise<SafeUser> {
+  async createUser(dto: CreateUserRequest): Promise<SafeUser> { 
     const user = await this.prismaService.user.create({
       data: {
         login: dto.login.trim(),

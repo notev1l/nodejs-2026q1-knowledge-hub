@@ -13,6 +13,7 @@ import {
 import { ArticleService } from './article.service';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
@@ -26,6 +27,7 @@ import { ArticleResponse } from './dto/articleResponse.dto';
 import { GetQueryParams } from './dto/getQueryParams.dto';
 import { ArticleStatus } from '@prisma/client';
 
+@ApiBearerAuth()
 @Controller('article')
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}

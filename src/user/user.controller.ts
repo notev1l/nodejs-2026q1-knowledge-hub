@@ -16,6 +16,7 @@ import { CreateUserRequest } from './dto/createUserRequest.dto';
 import { UpdatePasswordDto } from './dto/updatePassword.dto';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNoContentResponse,
@@ -26,6 +27,7 @@ import {
 } from '@nestjs/swagger';
 import { UserResponse } from './dto/userResponse.dto';
 
+@ApiBearerAuth()
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}

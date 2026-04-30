@@ -20,12 +20,12 @@ datasource db {
 
 model User {
   id        String    @id @default(uuid()) @db.Uuid
-  login     String    @db.VarChar(30)
-  password  String    @db.VarChar(50)
+  login     String    
+  password  String    
   role      UserRole  @default(VIEWER)
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamptz()
-
+  refreshToken String? @unique
   articles Article[]
   comments Comment[]
 
