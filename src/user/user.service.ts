@@ -8,6 +8,7 @@ import { UpdatePasswordDto } from './dto/updatePassword.dto';
 import { UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { SafeUser, safeUserSelect } from '../shared/types/safeUser.type';
+import { compare, hash } from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -43,7 +44,7 @@ export class UserService {
     return user;
   }
 
-  async updatePassword(id: string, dto: UpdatePasswordDto): Promise<boolean> {
+  async updatePassword(id: string, dto: UpdatePasswordDto): Promise<object> {
     const user = await this.prismaService.user.findUnique({
       where: { id }
     })
@@ -52,20 +53,24 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
-    if (user.password !== dto.oldPassword) {
+    const isMatch = await compare(dto.oldPassword.trim(), user.password);
+    
+    if (!isMatch) {
       throw new ForbiddenException('Old password is wrong');
     }
+
+    const newPassword = await hash(dto.newPassword.trim(), 10)
 
     await this.prismaService.user.update({
       where: {
         id: user.id,
       },
       data: {
-        password: dto.newPassword,
+        password: newPassword,
       },
     });
 
-    return true;
+    return { message: 'Password was successfuly updated' };
   }
 
   async deleteUser(id: string): Promise<void> {

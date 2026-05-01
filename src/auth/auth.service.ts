@@ -36,13 +36,17 @@ export class AuthService {
   }
 
   async validateUser(login: string, password: string): Promise<SafeUser> {
-    const user = await this.prismaService.user.findFirst({
+    const user = await this.prismaService.user.findUnique({
       where: { login: login.trim() }
     })
 
+    if (!user) {
+      throw new NotFoundException()
+    }
+
     const isMatch = await compare(password.trim(), user.password);
 
-    if (!user || !isMatch) throw new ForbiddenException();
+    if (!isMatch) throw new ForbiddenException();
 
     return user
   }

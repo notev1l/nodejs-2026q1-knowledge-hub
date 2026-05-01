@@ -1,13 +1,13 @@
 enum UserRole {
-  ADMIN  @map("admin")
-  EDITOR @map("editor")
-  VIEWER @map("viewer")
+  ADMIN
+  EDITOR
+  VIEWER
 }
 
 enum ArticleStatus {
-  DRAFT     @map("draft")
-  PUBLISHED @map("published")
-  ARCHIVED  @map("archived")
+  DRAFT
+  PUBLISHED
+  ARCHIVED
 }
 
 generator client {
@@ -20,7 +20,7 @@ datasource db {
 
 model User {
   id        String    @id @default(uuid()) @db.Uuid
-  login     String    
+  login     String    @unique
   password  String    
   role      UserRole  @default(VIEWER)
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz()

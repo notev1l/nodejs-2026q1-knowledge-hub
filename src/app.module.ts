@@ -25,7 +25,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
     PrismaModule,
     ThrottlerModule.forRoot([{
       ttl: 60000,
-      limit: 2,
+      limit: 100,
     }])
   ],
   providers: [
