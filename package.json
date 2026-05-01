@@ -23,20 +23,31 @@
     "test:rbac": "cross-env TEST_MODE=auth jest --testPathPattern rbac --noStackTrace --runInBand",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "migrate:dev": "prisma migrate dev",
+    "migrate:prod": "prisma migrate deploy"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.18",
+    "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.1.18",
-    "@nestjs/jwt": "^11.0.0",
+    "@nestjs/jwt": "^11.0.2",
     "@nestjs/mapped-types": "^2.1.0",
+    "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.18",
     "@nestjs/swagger": "^11.2.6",
+    "@nestjs/throttler": "^6.5.0",
+    "@prisma/adapter-pg": "^7.7.0",
+    "@prisma/client": "^7.7.0",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.4",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.6.1",
+    "dotenv-cli": "^11.0.0",
     "http-status-codes": "^2.2.0",
+    "pg": "^8.20.0",
+    "postgres-array": "^3.0.4",
+    "prisma": "^7.7.0",
     "reflect-metadata": "^0.2.1",
     "rimraf": "^5.0.5",
     "rxjs": "^7.8.1",
@@ -45,12 +56,15 @@
   "devDependencies": {
     "@nestjs/cli": "^10.4.9",
     "@nestjs/schematics": "^10.0.3",
-    "@nestjs/testing": "^11.1.18",
+    "@nestjs/testing": "^11.1.19",
+    "@prisma/adapter-pg": "^7.7.0",
+    "@prisma/client": "^7.7.0",
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^20.11.24",
+    "@types/pg": "^8.20.0",
     "@types/supertest": "^6.0.2",
     "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
@@ -68,5 +82,8 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.3"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }

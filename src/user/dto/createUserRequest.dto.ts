@@ -1,6 +1,7 @@
 import { IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
-import { UserRole } from '../../common/enums';
+import { UserRole } from '@prisma/client';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class CreateUserRequest {
   @IsString()
@@ -23,6 +24,7 @@ export class CreateUserRequest {
 
   @IsEnum(UserRole, { message: 'Role must be one of: admin, editor, viewer' })
   @IsOptional()
+  @Transform(({ value }) => typeof value === 'string' ? value.toUpperCase() : value)
   @ApiPropertyOptional({
     description: 'User role',
     enum: UserRole,

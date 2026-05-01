@@ -32,13 +32,16 @@ export class UserResponse {
     description: 'Timestamp when user was created',
     example: '18753030467823',
   })
-  createdAt: number;
+  createdAt: Date;
 
   @ApiPropertyOptional({
     description: 'Timestamp when user was updated',
     example: '19793030467823',
   })
-  updatedAt: number;
+  updatedAt: Date;
+
+  @Exclude()
+  refreshToken: String | null;
 
   constructor(partialResponse: Partial<UserResponse>) {
     Object.assign(this, partialResponse);

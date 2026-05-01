@@ -12,6 +12,7 @@ import {
 import { CategoryService } from './category.service';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
@@ -21,7 +22,10 @@ import {
 } from '@nestjs/swagger';
 import { CategoryResponse } from './dto/categoryResponse.dto';
 import { CreateCategoryRequest } from './dto/createCategoryRequest.dto';
+import { Roles } from '../decorators/roles.decorator';
+import { UserRole } from '@prisma/client';
 
+@ApiBearerAuth()
 @Controller('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
@@ -52,6 +56,7 @@ export class CategoryController {
     return this.categoryService.getCategory(id);
   }
 
+  @Roles(UserRole.ADMIN)
   @Post('/')
   @ApiOperation({
     summary: 'Create category',
@@ -68,6 +73,7 @@ export class CategoryController {
     return this.categoryService.createCategory(dto);
   }
 
+  @Roles(UserRole.ADMIN)
   @Put('/:id')
   @ApiOperation({
     summary: 'Update category password',
@@ -84,6 +90,7 @@ export class CategoryController {
     return this.categoryService.updateCategory(id, dto);
   }
 
+  @Roles(UserRole.ADMIN)
   @Delete('/:id')
   @ApiOperation({
     summary: 'Delete category',

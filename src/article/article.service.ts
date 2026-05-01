@@ -1,97 +1,149 @@
-import {
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { Article } from '../common/types';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Article, Category, User } from '@prisma/client';
+import { ArticleStatus } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateArticleRequest } from './dto/createArticleRequest.dto';
-import { randomUUID } from 'node:crypto';
-import { ArticleStatus } from '../common/enums';
 import { UpdateArticleRequest } from './dto/updateArticleRequest.dto';
 import { GetQueryParams } from './dto/getQueryParams.dto';
-import { CommentService } from '../comment/comment.service';
 
 @Injectable()
 export class ArticleService {
-  private articles: Article[] = [];
+  constructor(private readonly prismaService: PrismaService) {}
 
-  constructor(
-    @Inject(forwardRef(() => CommentService))
-    private readonly commentService: CommentService,
-  ) {}
+  async getArticles(query: GetQueryParams): Promise<Article[]> {
+    return await this.prismaService.article.findMany({
+      where: {
+        ...(query.status !== undefined && { status: query.status }),
+        ...(query.categoryId !== undefined && { categoryId: query.categoryId }),
+        ...(query.tag !== undefined && { tags: {
+          some: {
+            name: query.tag
+          }
+        }})
+      },
+      include: {
+        tags: {
+          select: { name: true }
+        }
+      }
+    });
+  }
 
-  getArticles(query: GetQueryParams) {
-    if (Object.keys(query).length > 0) {
-      return this.articles.filter((article) => {
-        if (query.status && article.status !== query.status) return false;
-        if (query.categoryId && article.categoryId !== query.categoryId)
-          return false;
-        if (query.tag && !article.tags.includes(query.tag)) return false;
-        return true;
-      });
+  async getArticle(id: string): Promise<Article> {
+    const article = await this.prismaService.article.findUnique({
+      where: { id },
+      include: {
+        tags: {
+          select: {
+            name: true,
+          }
+        }
+      }
+    });
+
+    if (!article) {
+      throw new NotFoundException(`Article with id: ${id} was not found`);
     }
 
-    return this.articles;
-  }
-
-  getArticle(id: string) {
-    const article = this.articles.find((article) => article.id === id);
-
-    if (!article)
-      throw new NotFoundException(`Article with id: ${id} was not found`);
-
     return article;
   }
 
-  createArticle(dto: CreateArticleRequest) {
-    const newArticle = {
-      id: randomUUID(),
-      title: dto.title.trim(),
-      content: dto.content.trim(),
-      status: dto.status ?? ArticleStatus.DRAFT,
-      authorId: dto.authorId ?? null,
-      categoryId: dto.categoryId ?? null,
-      tags: dto.tags ?? [],
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    };
-    this.articles.push(newArticle);
+  async createArticle(dto: CreateArticleRequest): Promise<Article> {
 
-    return newArticle;
-  }
+    let author: User
+    let category: Category
 
-  updateArticle(id: string, dto: UpdateArticleRequest) {
-    const article = this.getArticle(id);
-    article.updatedAt = Date.now();
+    if (dto.authorId) {
+      author = await this.prismaService.user.findUnique({
+        where: { id: dto.authorId },
+      })
+    }
 
-    Object.assign(article, dto);
+    if (dto.authorId && !author) {
+      throw new NotFoundException(`AuthorId with id: ${dto.authorId} was not found`)
+    }
+    
+    if (dto.categoryId) {
+      category = await this.prismaService.category.findUnique({
+        where: { id: dto.categoryId }
+      })
+    }
 
+    if (dto.categoryId && !category) {
+      throw new NotFoundException(`CategoryId with id: ${dto.categoryId} was not found`)
+    }
+
+    const article = await this.prismaService.article.create({
+      data: {
+        title: dto.title.trim(),
+        content: dto.content.trim(),
+        status: dto.status ?? ArticleStatus.DRAFT,
+        authorId: dto.authorId ?? null,
+        categoryId: dto.categoryId ?? null,
+        ...(dto.tags && {
+          tags: {
+            connectOrCreate: dto.tags.map(tag => ({
+              where: { name: tag},
+              create: { name: tag},
+            })),
+          }
+        }),
+      },
+      include: {
+        tags: {
+          select: {
+            name: true,
+          }
+        }
+      }
+    });
+    
     return article;
   }
 
-  setPropertyIdToNull(id: string, propertyName: 'authorId' | 'categoryId') {
-    this.articles
-      .filter((article) => article[propertyName] === id)
-      .forEach((article) => (article[propertyName] = null));
+  async updateArticle(user: User, id: string, dto: UpdateArticleRequest): Promise<Article> {
+    
+    const article = await this.getArticle(id)
+
+    if (user.role !== 'ADMIN' && article.authorId !== user.id) {
+      throw new ForbiddenException(`You are not allowed to perform this action`)
+    }
+
+    return await this.prismaService.article.update({
+      where: {
+        id,
+      },
+      data: {
+        ...(dto.title !== undefined && { title: dto.title.trim() }),
+        ...(dto.content !== undefined && { content: dto.content.trim() }),
+        ...(dto.status !== undefined && { status: dto.status }),
+        ...(dto.authorId !== undefined && { authorId: dto.authorId}),
+        ...(dto.categoryId !== undefined && { categoryId: dto.categoryId}),
+        ...(dto.tags !== undefined && { tags: {
+          set: [],
+          connectOrCreate: dto.tags.map(tag => ({
+            where: { name: tag },
+            create: { name: tag },
+          }))
+        }}),
+      },
+      include: {
+        tags: {
+          select: {
+            name: true,
+          }
+        }
+      }
+    });
   }
 
-  deleteArticle(id: string) {
-    const articleIndex = this.articles.findIndex(
-      (article) => article.id === id,
-    );
+  async deleteArticle(user: User, id: string): Promise<void> {
+    const article = await this.getArticle(id)
 
-    if (articleIndex === -1)
-      throw new NotFoundException(`Article with id: ${id} was not found`);
+    if (user.role !== 'ADMIN' && article.authorId !== user.id) {
+      throw new ForbiddenException(`You are not allowed to perform this action`)
+    }
 
-    this.articles.splice(articleIndex, 1);
-    this.commentService.deleteCommentsByPropertyId(id, 'articleId');
-  }
-
-  checkIfArticleIdExists(articleId: string) {
-    const isExists = Boolean(
-      this.articles.find((article) => article.id === articleId),
-    );
-    return isExists;
+    await this.prismaService.article.delete({ where: { id } })
   }
 }

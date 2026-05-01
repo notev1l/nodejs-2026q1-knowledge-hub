@@ -13,9 +13,10 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserRequest } from './dto/createUserRequest.dto';
-import { UpdatePasswordDto } from './dto/UpdatePassword.dto';
+import { UpdatePasswordDto } from './dto/updatePassword.dto';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNoContentResponse,
@@ -25,7 +26,10 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { UserResponse } from './dto/userResponse.dto';
+import { Roles } from '../decorators/roles.decorator';
+import { UserRole } from '@prisma/client';
 
+@ApiBearerAuth()
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -38,7 +42,7 @@ export class UserController {
   })
   @ApiOkResponse({ description: 'Array of user records', type: [UserResponse] })
   getUsers() {
-    return this.userService.getUsers().map((user) => new UserResponse(user));
+    return this.userService.findAll();
   }
 
   @Get('/:id')
@@ -51,9 +55,10 @@ export class UserController {
   @ApiBadRequestResponse({ description: 'Provided ID is not a valid UUID' })
   @ApiNotFoundResponse({ description: 'User not found' })
   getUserById(@Param('id', new ParseUUIDPipe()) id: string) {
-    return new UserResponse(this.userService.getUserById(id));
+    return this.userService.findById(id);
   }
 
+  @Roles(UserRole.ADMIN)
   @Post('/')
   @ApiOperation({
     summary: 'Create user',
@@ -64,9 +69,9 @@ export class UserController {
     description: 'Request body does not contain required fields',
   })
   createUser(@Body() dto: CreateUserRequest) {
-    return new UserResponse(this.userService.createUser(dto));
+    return this.userService.createUser(dto);
   }
-
+  @Roles(UserRole.ADMIN)
   @Put('/:id')
   @ApiOperation({
     summary: 'Update user password',
@@ -81,9 +86,9 @@ export class UserController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdatePasswordDto,
   ) {
-    return new UserResponse(this.userService.updatePassword(id, dto));
+    return this.userService.updatePassword(id, dto);
   }
-
+  @Roles(UserRole.ADMIN)
   @Delete('/:id')
   @ApiOperation({
     summary: 'Delete user',
